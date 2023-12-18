@@ -2,8 +2,8 @@ import argparse
 import pathlib
 
 
-# TODO: Use __slots__
 class Arguments:
+    __slots__ = ("directories", "cli", "fork", "third_party", "work")
     directories: list[pathlib.Path]
     cli: bool
     fork: bool
