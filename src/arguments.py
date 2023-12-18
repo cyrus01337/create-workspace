@@ -3,39 +3,27 @@ import pathlib
 
 
 class Arguments(argparse.Namespace):
-    __slots__ = ("_cached_str_attrs", "directories", "cli", "fork", "third_party", "work")
+    __slots__ = ("_cached_repr", "_flags", "directories", "cli", "fork", "third_party", "work")
 
     def __init__(self):
-        self._cached_str_attrs: dict[str, bool] = {}
+        self._cached_repr = ""
+        self._flags = ("cli", "fork", "third_party", "work")
+        self.cli = False
+        self.fork = False
+        self.third_party = False
+        self.work = False
 
-    @property
-    def _str_attrs(self):
-        if not self._cached_str_attrs:
-            self._cached_str_attrs = {
-                "cli": self.cli,
-                "fork": self.fork,
-                "third_party": self.third_party,
-                "work": self.work,
-            }
-
-        return self._cached_str_attrs
-
-    # TODO: Check if results of dunder methods can be cached
     def __str__(self):
-        enabled_flags: list[str] = []
+        return self._cached_repr or self._generate_and_cache_repr()
 
-        for name in self.__slots__[2:]:
-            flag_enabled = self._str_attrs[name]
+    def _generate_and_cache_repr(self):
+        if enabled_flags := [name for name in self._flags if getattr(self, name)]:
+            formatted_flags = " ".join(enabled_flags)
+            self._cached_repr = f"<Namespace directories={self.directories} {formatted_flags}>"
+        else:
+            self._cached_repr = f"<Namespace directories={self.directories}>"
 
-            if not flag_enabled:
-                continue
-
-            enabled_flags.append(name)
-
-        if formatted_flags := " ".join(enabled_flags):
-            return f"<Namespace directories={self.directories} {formatted_flags}>"
-
-        return f"<Namespace directories={self.directories}>"
+        return self._cached_repr
 
 
 _CWD = pathlib.Path.cwd()
