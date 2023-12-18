@@ -27,6 +27,7 @@ class Namespace:
     fork: bool
     third_party: bool
     work: bool
+    name: str
 
     # TODO: Refactor?
     def __str__(self):
@@ -55,6 +56,7 @@ PARSER.add_argument(
     "--third-party", action="store_true", dest="third_party", required=False, help="Generate in third-party sub-directory"
 )
 PARSER.add_argument("--work", action="store_true", required=False, help="Generate in work sub-directory")
+PARSER.add_argument("--name", type=str, required=False, help="Generate in work sub-directory")
 
 
 # TODO: Determine using TOML config
@@ -81,7 +83,8 @@ def main():
     for directory in map(pathlib.Path.resolve, args.directories):
         workspace = copy.deepcopy(WORKSPACE_TEMPLATE)
         workspace["folders"][0]["path"] = str(directory.relative_to(target_directory, walk_up=True))
-        workspace_file = target_directory / f"{directory.name}.code-workspace"
+        filename = args.name or directory.name
+        workspace_file = target_directory / f"{filename}.code-workspace"
 
         with workspace_file.open("w") as fh:
             json.dump(workspace, fh, indent=4, sort_keys=True)
