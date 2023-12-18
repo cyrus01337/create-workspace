@@ -4,23 +4,38 @@ import pathlib
 
 class Arguments:
     __slots__ = ("directories", "cli", "fork", "third_party", "work")
+
     directories: list[pathlib.Path]
     cli: bool
     fork: bool
     third_party: bool
     work: bool
 
-    # TODO: Refactor?
+    # TODO: Convert to cached property
+    @property
+    def _str_attrs(self):
+        return {
+            "cli": self.cli,
+            "fork": self.fork,
+            "third_party": self.third_party,
+            "work": self.work,
+        }
+
+    # TODO: Check if results of dunder methods can be cached
     def __str__(self):
-        return (
-            "<Namespace "
-            f"directories={self.directories}"
-            f"{' cli' if self.cli else ''}"
-            f"{' fork' if self.fork else ''}"
-            f"{' third_party' if self.third_party else ''}"
-            f"{' work' if self.work else ''}"
-            ">"
-        )
+        enabled_flags: list[str] = []
+
+        for name in self.__slots__[1:]:
+            flag_enabled = self._str_attrs[name]
+
+            if not flag_enabled:
+                continue
+
+            enabled_flags.append(name)
+
+        formatted_flags = " ".join(enabled_flags)
+
+        return f"<Namespace directories={self.directories} {formatted_flags}>"
 
 
 _CWD = pathlib.Path.cwd()
