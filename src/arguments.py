@@ -2,30 +2,29 @@ import argparse
 import pathlib
 
 
-class Arguments:
-    __slots__ = ("directories", "cli", "fork", "third_party", "work")
+class Arguments(argparse.Namespace):
+    __slots__ = ("_cached_str_attrs", "directories", "cli", "fork", "third_party", "work")
 
-    directories: list[pathlib.Path]
-    cli: bool
-    fork: bool
-    third_party: bool
-    work: bool
+    def __init__(self):
+        self._cached_str_attrs: dict[str, bool] = {}
 
-    # TODO: Convert to cached property
     @property
     def _str_attrs(self):
-        return {
-            "cli": self.cli,
-            "fork": self.fork,
-            "third_party": self.third_party,
-            "work": self.work,
-        }
+        if not self._cached_str_attrs:
+            self._cached_str_attrs = {
+                "cli": self.cli,
+                "fork": self.fork,
+                "third_party": self.third_party,
+                "work": self.work,
+            }
+
+        return self._cached_str_attrs
 
     # TODO: Check if results of dunder methods can be cached
     def __str__(self):
         enabled_flags: list[str] = []
 
-        for name in self.__slots__[1:]:
+        for name in self.__slots__[2:]:
             flag_enabled = self._str_attrs[name]
 
             if not flag_enabled:
@@ -33,9 +32,10 @@ class Arguments:
 
             enabled_flags.append(name)
 
-        formatted_flags = " ".join(enabled_flags)
+        if formatted_flags := " ".join(enabled_flags):
+            return f"<Namespace directories={self.directories} {formatted_flags}>"
 
-        return f"<Namespace directories={self.directories} {formatted_flags}>"
+        return f"<Namespace directories={self.directories}>"
 
 
 _CWD = pathlib.Path.cwd()
