@@ -27,13 +27,11 @@ class Namespace:
     fork: bool
     third_party: bool
     work: bool
-    name: str
 
     # TODO: Refactor?
     def __str__(self):
         return (
             "<Namespace "
-            f"name={self.name} "
             f"directories={self.directories}"
             f"{' cli' if self.cli else ''}"
             f"{' fork' if self.fork else ''}"
@@ -57,7 +55,6 @@ PARSER.add_argument(
     "--third-party", action="store_true", dest="third_party", required=False, help="Generate in third-party sub-directory"
 )
 PARSER.add_argument("--work", action="store_true", required=False, help="Generate in work sub-directory")
-PARSER.add_argument("--name", type=str, required=False, help="Set filename for generated workspace file")
 
 
 # TODO: Determine using TOML config
