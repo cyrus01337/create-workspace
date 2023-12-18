@@ -1,13 +1,14 @@
 import argparse
 import pathlib
 
+FLAGS = ("cli", "fork", "third_party", "work")
+
 
 class Arguments(argparse.Namespace):
-    __slots__ = ("_cached_repr", "_flags", "directories", "cli", "fork", "third_party", "work")
+    __slots__ = ("_cached_repr", "directories", "cli", "fork", "third_party", "work")
 
     def __init__(self):
         self._cached_repr = ""
-        self._flags = ("cli", "fork", "third_party", "work")
         self.cli = False
         self.fork = False
         self.third_party = False
@@ -17,7 +18,7 @@ class Arguments(argparse.Namespace):
         return self._cached_repr or self._generate_and_cache_repr()
 
     def _generate_and_cache_repr(self):
-        if enabled_flags := [name for name in self._flags if getattr(self, name)]:
+        if enabled_flags := [name for name in FLAGS if getattr(self, name)]:
             formatted_flags = " ".join(enabled_flags)
             self._cached_repr = f"<Namespace directories={self.directories} {formatted_flags}>"
         else:
@@ -34,10 +35,6 @@ _PARSER = argparse.ArgumentParser(
     allow_abbrev=True,
 )
 _PARSER.add_argument("directories", nargs="*", type=pathlib.Path, default=[_CWD], help="Generate in CLI sub-directory")
-# TODO: Assign sub-directory name as default value for all sub-directory flags
-# and reflect in get_target_directory
-#
-# https://docs.python.org/3/library/argparse.html#action
 _PARSER.add_argument("--cli", action="store_true", required=False, help="Generate in CLI sub-directory")
 _PARSER.add_argument("--fork", action="store_true", required=False, help="Generate in forks sub-directory")
 _PARSER.add_argument(
