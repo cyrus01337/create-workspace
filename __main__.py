@@ -1,22 +1,8 @@
 #!/usr/bin/env python3
 import argparse
-import copy
-import json
 import pathlib
-import typing
 
-
-# TODO: Move to module
-class WorkspacePath(typing.TypedDict):
-    path: str
-
-
-class WorkspaceTemplate(typing.TypedDict):
-    folders: list[WorkspacePath]
-    settings: dict
-
-
-WORKSPACE_TEMPLATE = WorkspaceTemplate(folders=[WorkspacePath(path="")], settings={})
+from src import workspaces
 
 
 # TODO: Move to module
@@ -49,6 +35,10 @@ PARSER = argparse.ArgumentParser(
     allow_abbrev=True,
 )
 PARSER.add_argument("directories", nargs="*", type=pathlib.Path, default=[CWD], help="Generate in CLI sub-directory")
+# TODO: Assign sub-directory name as default value for all sub-directory flags
+# and reflect in get_target_directory
+#
+# https://docs.python.org/3/library/argparse.html#action
 PARSER.add_argument("--cli", action="store_true", required=False, help="Generate in CLI sub-directory")
 PARSER.add_argument("--fork", action="store_true", required=False, help="Generate in forks sub-directory")
 PARSER.add_argument(
@@ -79,13 +69,7 @@ def main():
     target_directory = get_target_directory(args)
 
     for directory in map(pathlib.Path.resolve, args.directories):
-        workspace = copy.deepcopy(WORKSPACE_TEMPLATE)
-        workspace["folders"][0]["path"] = str(directory.relative_to(target_directory, walk_up=True))
-        filename = args.name or directory.name
-        workspace_file = target_directory / f"{filename}.code-workspace"
-
-        with workspace_file.open("w") as fh:
-            json.dump(workspace, fh, indent=4, sort_keys=True)
+        workspaces.generate(source=directory, destination=target_directory)
 
 
 if __name__ == "__main__":
