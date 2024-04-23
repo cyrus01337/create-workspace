@@ -21,5 +21,8 @@ def generate(*, source: pathlib.Path, destination: pathlib.Path):
     workspace["folders"][0]["path"] = str(source.relative_to(destination, walk_up=True))
     file = destination / f"{source.name}.code-workspace"
 
+    file.parent.mkdir(parents=True)
+    file.touch(exist_ok=False)
+
     with file.open("w") as fh:
         json.dump(workspace, fh, indent=4, sort_keys=True)
